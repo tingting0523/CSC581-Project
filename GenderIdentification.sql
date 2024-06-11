@@ -10,14 +10,16 @@ USE `GenderIdentification`;
 
 
 -- Table GenderIdentification.facial_landmarks
+drop table if exists `GenderIdentification`.`facial_landmarks`;
 CREATE TABLE IF NOT EXISTS `GenderIdentification`.`facial_landmarks` (
     id SERIAL PRIMARY KEY,
     p_id varchar(10) NOT NULL,   -- m-001
     image_id varchar(10) NOT NULL,  -- m-001-01.pts
     point_id varchar(10) NOT NULL,  -- 0/1/2....
     x_coordinate FLOAT NOT NULL, 
-    y_coordinate FLOAT NOT NULL
+    y_coordinate FLOAT NOT NULL 
 );
+ALTER TABLE GenderIdentification.facial_landmarks ADD CONSTRAINT unique_landmark UNIQUE (p_id, image_id, point_id);
 
 
 
