@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `GenderIdentification`.`facial_landmarks` (
     id SERIAL PRIMARY KEY,
     p_id varchar(10) NOT NULL,   -- m-001
     image_id varchar(10) NOT NULL,  -- m-001-01.pts
-    point_id varchar(10) NOT NULL,  -- 0/1/2....
+    point_id INT NOT NULL,  -- 0/1/2....
     x_coordinate FLOAT NOT NULL, 
     y_coordinate FLOAT NOT NULL 
 );
