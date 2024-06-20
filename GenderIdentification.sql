@@ -14,6 +14,7 @@ drop table if exists `GenderIdentification`.`facial_landmarks`;
 CREATE TABLE IF NOT EXISTS `GenderIdentification`.`facial_landmarks` (
     id SERIAL PRIMARY KEY,
     p_id varchar(10) NOT NULL,   -- m-001
+    gender int Not null,  -- 0:male  1:female
     image_id varchar(10) NOT NULL,  -- m-001-01.pts
     point_id INT NOT NULL,  -- 0/1/2....
     x_coordinate FLOAT NOT NULL, 
