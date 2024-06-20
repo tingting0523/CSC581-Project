@@ -16,7 +16,7 @@ def parse_pts_file(file_path):
             points.append((x, y))
         return points
 
-def insert_landmarks_into_db(cursor, p_id, image_id, points): 
+def insert_landmarks_into_db(cursor, p_id, image_id, gender, points): 
     for index, (x, y) in enumerate(points):
         # Check if the record already exists
         cursor.execute(
@@ -26,8 +26,8 @@ def insert_landmarks_into_db(cursor, p_id, image_id, points):
         result = cursor.fetchone()
         if result[0] == 0:  # If record does not exist, insert it
             cursor.execute(
-                "INSERT INTO facial_landmarks (p_id, image_id, point_id, x_coordinate, y_coordinate) VALUES (%s, %s, %s, %s, %s)",
-                (p_id, image_id, index, x, y)
+                "INSERT INTO facial_landmarks (p_id, gender, image_id, point_id, x_coordinate, y_coordinate) VALUES (%s, %s, %s, %s, %s, %s)",
+                (p_id, gender, image_id, index, x, y)
             )
 
 def main():
@@ -61,7 +61,8 @@ def main():
                         file_path = os.path.join(sub_directory_path, file_name)
                         points = parse_pts_file(file_path)
                         image_id = os.path.splitext(file_name)[0]  # Remove the .pts extension
-                        insert_landmarks_into_db(cursor, p_id, image_id, points)
+                        gender = 0 if p_id[0].lower() == 'm' else 1  # Determine gender based on first letter of p_id
+                        insert_landmarks_into_db(cursor, p_id, image_id, gender, points)
 
         # Commit and close
         conn.commit()
