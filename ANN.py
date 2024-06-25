@@ -34,6 +34,8 @@ def feature_id_and_ratios(ratios):
             features.get("lip_size_ratio"),
             features.get("lip_length_ratio"),
             features.get("eyebrow_length_ratio"),
+            features.get("aggressive_ratio"),
+            features.get("eyebrow_length_ratio"),
             features.get("aggressive_ratio")
         )
         new_data[feature_id] = (ratio_tuple, 'man' if person_id.startswith('m-') else 'woman')
@@ -81,8 +83,8 @@ y_train = numpy.array(y_train).reshape(-1, 1)
 y_test = numpy.array(y_test).reshape(-1, 1)
 
 # Initialize weights randomly
-numpy.random.seed(42)
-inumpyut_layer_neurons = X_train.shape[1]
+numpy.random.seed(42) #Set a random seed to ensure consistent results each time you run it
+inumpyut_layer_neurons = X_train.shape[1] # The number of neurons in the input layer, i.e. the dimension of the feature
 hidden_layer_neurons = 64
 output_neurons = 1
 

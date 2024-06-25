@@ -39,6 +39,8 @@ def feature_id_and_ratios(ratios):
             features.get("lip_size_ratio"),
             features.get("lip_length_ratio"),
             features.get("eyebrow_length_ratio"),
+            features.get("aggressive_ratio"),
+            features.get("eyebrow_length_ratio"),
             features.get("aggressive_ratio")
         )
         new_data[feature_id] = (ratio_tuple, 'man' if person_id.startswith('m-') else 'woman')
