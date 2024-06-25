@@ -10,7 +10,8 @@ load_dotenv()
 def euclidean_distance(point1, point2):
     return np.linalg.norm(point1 - point2)
 
-# Function to calculate ratios
+
+# Function to calculate Eye length ratio: length of eye (maximum of two) over distance between points 8 and 13.
 def calculate_eye_length_ratio(max_eye_distance, distance_8_13):
     return max_eye_distance / distance_8_13
 
@@ -23,20 +24,28 @@ def calculate_nose_ratio(distance_15_16, distance_20_21):
     return distance_15_16 / distance_20_21
 
 # Function to calculate Lip size ratio: Distance between points 2 and 3 over distance between 17 and 18. 
-def calculate_lip_size_ratio(distance_2_3, distance_17_18):
+def calculate_lip_size_ratio(distance_2_3,distance_17_18):
     return distance_2_3 / distance_17_18
 
 # Function to calculate Lip length ratio: Distance between points 2 and 3 over distance between 20 and 21. 
-def calculate_lip_length_ratio(distance_2_3, distance_20_21):
+def calculate_lip_length_ratio(distance_2_3,distance_20_21):
     return distance_2_3 / distance_20_21
 
 # Function to calculate Eye-brow length ratio: Distance between points 4 and 5 (or distance between points 6 and 7 whichever is larger) over distance between 8 and 13. 
-def calculate_eyebrow_length_ratio(max_eyebrow_length, distance_8_13):
+def calculate_eyebrow_length_ratio(max_eyebrow_length,distance_8_13):
     return max_eyebrow_length / distance_8_13
 
 # Function to calculate Aggressive ratio: Distance between points 10 and 19 over distance between 20 and 21. 
-def calculate_aggressive_ratio(distance_10_19, distance_20_21):
+def calculate_aggressive_ratio(distance_10_19,distance_20_21):
     return distance_10_19 / distance_20_21
+
+# Funtion to calculate facial_symmetry_ratio: Symmetry of the face
+def calculate_facial_symmetry_ratio(distance_15_20,distance_16_21):
+    return distance_15_20/distance_16_21
+
+# Function to calculate Inter-Brow Distance: Distance between point 5 and point 6.
+def calculate_inter_brow_distance(distance_5_6):
+    return distance_5_6
 
 
 def calculate_distances_from_db():
@@ -54,8 +63,10 @@ def calculate_distances_from_db():
     # sql query
     query = ("SELECT p_id, image_id, point_id, x_coordinate, y_coordinate "
              "FROM facial_landmarks "
-             "WHERE point_id IN (9, 10, 11, 12, 0, 1, 8, 13, 15, 16, 20, 21, 2, 3, 17, 18, 4, 5, 6, 7, 19)")
+             "WHERE point_id IN (9, 10, 11, 12, 0, 1, 8, 13, 15, 16, 20, 21, 2, 3, 17, 18, 4, 5, 6, 7, 19)"  # Include necessary points for calculations
+            )
     cursor.execute(query)
+    
 
     # Get the coordinate data of facial feature points from the database and organize them into a dictionary `distances`
     distances = {}
@@ -63,23 +74,46 @@ def calculate_distances_from_db():
         key = (p_id, image_id)
         if key not in distances:
             distances[key] = {}
-        distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])
+        
+        if point_id == 8 or point_id == 13:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])
+        elif point_id == 9 or point_id == 10:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])
+        elif point_id == 11 or point_id == 12:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])  
+        elif point_id == 0 or point_id == 1:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate]) 
+        elif point_id == 15 or point_id == 16:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
+        elif point_id == 20 or point_id == 21:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
+        elif point_id == 2 or point_id == 3:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])
+        elif point_id == 17 or point_id == 18:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])  
+        elif point_id == 4 or point_id == 5:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate]) 
+        elif point_id == 6 or point_id == 7:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
+        elif point_id == 10 or point_id == 19:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])  
+        elif point_id == 5 or point_id == 6:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
+        elif point_id == 15 or point_id == 20:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
+        elif point_id == 16 or point_id == 21:
+            distances[key][f'point{point_id}'] = np.array([x_coordinate, y_coordinate])    
 
     cursor.close()
     conn.close()
 
-    conn = mysql.connector.connect(host=host, port=port, user=user, password=password, database=database)
-    cursor = conn.cursor()
-    cursor.execute("SELECT p_id, gender FROM facial_landmarks")
-    gender_labels = {p_id: gender for p_id, gender in cursor}
-    cursor.close()
-    conn.close()
-
-    result = []
-    labels = []
+    result = {}
     for key, value in distances.items():
         try:
-            if 'point8' in value and 'point13' in value and 'point9' in value and 'point10' in value and 'point11' in value and 'point12' in value:
+            if 'point8' in value and 'point13' in value and 'point9' in value and 'point10' in value \
+               and 'point11' in value and 'point12' in value:
+
+                # Calculate distances
                 distance_eye1 = euclidean_distance(value['point9'], value['point10'])
                 distance_eye2 = euclidean_distance(value['point11'], value['point12'])
                 max_eye_distance = max(distance_eye1, distance_eye2)
@@ -93,50 +127,62 @@ def calculate_distances_from_db():
                 distance_eyebrow2 = euclidean_distance(value['point6'], value['point7'])
                 max_eyebrow_length = max(distance_eyebrow1, distance_eyebrow2)
                 distance_10_19 = euclidean_distance(value['point10'], value['point19'])
-
+                distance_20_21 = euclidean_distance(value['point20'], value['point21'])
+                distance_5_6 = euclidean_distance(value['point5'], value['point6'])
+                distance_15_20 = euclidean_distance(value['point15'], value['point20'])
+                distance_16_21 = euclidean_distance(value['point16'], value['point21'])
+                
                 # Calculate ratios
                 eye_length_ratio = calculate_eye_length_ratio(max_eye_distance, distance_8_13)
-                eye_distance_ratio = calculate_eye_distance_ratio(eye_center, distance_8_13)
+                eye_distance_ratio= calculate_eye_distance_ratio(eye_center, distance_8_13)
                 nose_ratio = calculate_nose_ratio(distance_15_16, distance_20_21)
-                lip_size_ratio = calculate_lip_size_ratio(distance_2_3, distance_17_18)
-                lip_length_ratio = calculate_lip_length_ratio(distance_2_3, distance_20_21)
-                eyebrow_length_ratio = calculate_eyebrow_length_ratio(max_eyebrow_length, distance_8_13)
-                aggressive_ratio = calculate_aggressive_ratio(distance_10_19, distance_20_21)
+                lip_size_ratio = calculate_lip_size_ratio(distance_2_3,distance_17_18)
+                lip_length_ratio = calculate_lip_length_ratio(distance_2_3,distance_20_21)
+                eyebrow_length_ratio = calculate_eyebrow_length_ratio(max_eyebrow_length,distance_8_13)
+                aggressive_ratio = calculate_aggressive_ratio(distance_10_19,distance_20_21)
+                inter_brow_distance = calculate_inter_brow_distance(distance_5_6)
+                facial_symmetry_ratio = calculate_facial_symmetry_ratio(distance_15_20,distance_16_21)
+                
 
-                result.append([
-                    eye_length_ratio,
-                    eye_distance_ratio,
-                    nose_ratio,
-                    lip_size_ratio,
-                    lip_length_ratio,
-                    eyebrow_length_ratio,
-                    aggressive_ratio
-                ])
-
-                labels.append(gender_labels[key[0]])
-
+                result[key] = {
+                    'Eye length ratio': eye_length_ratio,
+                    'eye_distance_ratio': eye_distance_ratio,
+                    'nose_ratio': nose_ratio,
+                    'lip_size_ratio': lip_size_ratio,
+                    'lip_length_ratio': lip_length_ratio,
+                    'eyebrow_length_ratio': eyebrow_length_ratio,
+                    'aggressive_ratio':aggressive_ratio,
+                    'inter_brow_distance':inter_brow_distance,
+                    'facial_symmetry_ratio':facial_symmetry_ratio
+                }
             else:
                 print(f"Missing necessary points {point_id} for key {key}")
 
         except KeyError as e:
             print(f"KeyError: Missing key {e} in value {value}")
-    
-    # Verify that data is read correctly
-    save_distances_to_file(distances, 'distances.txt') 
 
-    np.save('features.npy', result)
-    np.save('labels.npy', labels)
+    return result
 
-# print distances data to a file
+#save file
 def save_distances_to_file(distances, filename):
     with open(filename, 'w') as file:
+        file.write("Ratios: {")
+        first_item = True
         for key, value in distances.items():
-            file.write(f"p_id, image_id: {key}\n")
-            for point_id, coordinates in value.items():
-                file.write(f"{point_id}: {coordinates.tolist()}\n")
-            file.write("\n")
-
+            if not first_item:
+                file.write(", ")
+            file.write(f"{key}: {{")
+            first_ratio = True
+            for ratio_name, ratio_value in value.items():
+                if not first_ratio:
+                    file.write(", ")
+                file.write(f"'{ratio_name}': {ratio_value}")
+                first_ratio = False
+            file.write("}")
+            first_item = False
+        file.write("}")
 
 if __name__ == "__main__":
     distances = calculate_distances_from_db()
-    
+    print("Ratios:", distances)
+    save_distances_to_file(distances, 'message.txt')
